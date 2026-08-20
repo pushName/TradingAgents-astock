@@ -1,3 +1,4 @@
+from tradingagents.agents.utils.agent_utils import get_prompt_override
 
 
 def create_aggressive_debator(llm):
@@ -46,6 +47,7 @@ Conversation history: {history} Last conservative argument: {current_conservativ
 
 Engage actively, debate persuasively, and assert why aggressive positioning is optimal for this A-share opportunity. Output conversationally without special formatting."""
 
+        prompt = get_prompt_override("risk_aggressive", prompt)
         response = llm.invoke(prompt)
 
         argument = f"Aggressive Analyst: {response.content}"

@@ -7,7 +7,7 @@ import functools
 from langchain_core.messages import AIMessage
 
 from tradingagents.agents.schemas import TraderProposal, render_trader_proposal
-from tradingagents.agents.utils.agent_utils import build_instrument_context, get_language_instruction
+from tradingagents.agents.utils.agent_utils import build_instrument_context, get_language_instruction, get_prompt_override
 from tradingagents.agents.utils.structured import (
     bind_structured,
     invoke_structured_or_freetext,
@@ -83,6 +83,7 @@ def create_trader(llm):
             },
         ]
 
+        prompt = get_prompt_override("trader", prompt)
         trader_plan = invoke_structured_or_freetext(
             structured_llm,
             llm,

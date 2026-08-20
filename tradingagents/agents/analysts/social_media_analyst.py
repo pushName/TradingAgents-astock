@@ -6,6 +6,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_language_instruction,
     get_news,
     get_stock_data,
+    get_prompt_override,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -56,6 +57,7 @@ def create_social_media_analyst(llm):
             "\n9. 情绪趋势变化方向（升温/降温/平稳）"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("social", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

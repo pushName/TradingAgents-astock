@@ -28,6 +28,7 @@ import socket
 import time
 import uuid
 import urllib.request
+from io import StringIO
 
 import pandas as pd
 import requests as _requests
@@ -611,7 +612,9 @@ def _ths_eps_forecast(code: str) -> pd.DataFrame:
     }
     r = _requests.get(url, headers=headers, timeout=15)
     r.encoding = "gbk"
-    dfs = pd.read_html(r.text)
+    # pandas>=2 不再接受裸 HTML 字符串（会被当文件路径打开，报
+    # FileNotFoundError: [Errno 2] No such file or directory: '<!DOCTYPE ...'）
+    dfs = pd.read_html(StringIO(r.text))
     # Find the table containing EPS data
     for df in dfs:
         cols = [str(c) for c in df.columns]

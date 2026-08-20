@@ -1,3 +1,4 @@
+from tradingagents.agents.utils.agent_utils import get_prompt_override
 
 
 def create_bear_researcher(llm):
@@ -50,6 +51,7 @@ Last bull argument: {current_response}
 Deliver a compelling bear argument grounded in A-share market realities. Refute the bull's claims and demonstrate the risks of investing in this stock within the Chinese regulatory and market structure.
 """
 
+        prompt = get_prompt_override("bear", prompt)
         response = llm.invoke(prompt)
 
         argument = f"Bear Analyst: {response.content}"

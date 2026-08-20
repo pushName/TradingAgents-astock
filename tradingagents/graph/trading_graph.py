@@ -594,6 +594,12 @@ class TradingAgentsGraph:
         existing thread instead of replaying completed nodes.
         """
         self.ticker = company_name
+        self.config["prompt_context"] = {
+            "ticker": company_name,
+            "date": str(trade_date),
+            "current_date": str(trade_date),
+        }
+        set_config({"prompt_context": self.config["prompt_context"]})
 
         # Resolve any pending memory-log entries for this ticker before the pipeline runs.
         self._resolve_pending_entries(company_name)

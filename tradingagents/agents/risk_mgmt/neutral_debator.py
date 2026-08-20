@@ -1,3 +1,4 @@
+from tradingagents.agents.utils.agent_utils import get_prompt_override
 
 
 def create_neutral_debator(llm):
@@ -47,6 +48,7 @@ Conversation history: {history} Last aggressive argument: {current_aggressive_re
 
 Advocate for a balanced, position-sized approach that captures A-share upside while respecting the market's structural constraints. Output conversationally without special formatting."""
 
+        prompt = get_prompt_override("risk_neutral", prompt)
         response = llm.invoke(prompt)
 
         argument = f"Neutral Analyst: {response.content}"

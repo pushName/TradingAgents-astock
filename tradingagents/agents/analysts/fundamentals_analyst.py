@@ -4,6 +4,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_balance_sheet,
     get_cashflow,
     get_fundamentals,
+    get_prompt_override,
     get_income_statement,
     get_industry_comparison,
     get_insider_transactions,
@@ -53,6 +54,7 @@ def create_fundamentals_analyst(llm):
             "\n7. 机构一致预期 EPS（调用 get_profit_forecast 获取）"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("fundamentals", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

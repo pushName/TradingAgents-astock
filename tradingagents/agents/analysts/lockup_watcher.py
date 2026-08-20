@@ -5,6 +5,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_insider_transactions,
     get_language_instruction,
     get_lockup_expiry,
+    get_prompt_override,
     get_news,
 )
 from tradingagents.dataflows.config import get_config
@@ -53,6 +54,7 @@ def create_lockup_watcher(llm):
             "\n5. 未来 3 个月潜在减持风险评估"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("lockup", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

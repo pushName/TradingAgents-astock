@@ -17,8 +17,9 @@ def create_market_analyst(llm):
         lookback = get_config().get("market_lookback_days") or 30
 
         tools = [
-            get_stock_data,
-            get_indicators,
+    get_stock_data,
+    get_indicators,
+    get_prompt_override,
         ]
 
         system_message = (
@@ -70,6 +71,7 @@ MACD 类：
 5. 关键支撑位和阻力位"""
             + get_language_instruction()
         )
+        system_message = get_prompt_override("market", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

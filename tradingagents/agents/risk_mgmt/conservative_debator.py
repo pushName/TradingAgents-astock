@@ -1,3 +1,4 @@
+from tradingagents.agents.utils.agent_utils import get_prompt_override
 
 
 def create_conservative_debator(llm):
@@ -47,6 +48,7 @@ Conversation history: {history} Last aggressive argument: {current_aggressive_re
 
 Demonstrate why a conservative stance is the safest path, especially given A-share market structure where downside protection mechanisms (stop-loss, same-day exit) are severely limited. Output conversationally without special formatting."""
 
+        prompt = get_prompt_override("risk_conservative", prompt)
         response = llm.invoke(prompt)
 
         argument = f"Conservative Analyst: {response.content}"

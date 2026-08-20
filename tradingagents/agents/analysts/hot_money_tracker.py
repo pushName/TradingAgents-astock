@@ -5,6 +5,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_dragon_tiger_board,
     get_fund_flow,
     get_hot_stocks,
+    get_prompt_override,
     get_industry_comparison,
     get_insider_transactions,
     get_language_instruction,
@@ -69,6 +70,7 @@ def create_hot_money_tracker(llm):
             "\n6. 资金面总体判断"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("hot_money", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

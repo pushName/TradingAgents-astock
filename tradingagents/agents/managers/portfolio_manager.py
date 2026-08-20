@@ -14,6 +14,7 @@ from tradingagents.agents.schemas import PortfolioDecision, render_pm_decision
 from tradingagents.agents.utils.agent_utils import (
     build_instrument_context,
     get_language_instruction,
+    get_prompt_override,
 )
 from tradingagents.agents.utils.structured import (
     bind_structured,
@@ -91,6 +92,7 @@ def create_portfolio_manager(llm):
 
 Be decisive and ground every conclusion in specific evidence from the analysts.{_NO_LEVELS_RULE}{get_language_instruction()}"""
 
+        prompt = get_prompt_override("portfolio_manager", prompt)
         final_trade_decision = invoke_structured_or_freetext(
             structured_llm,
             llm,

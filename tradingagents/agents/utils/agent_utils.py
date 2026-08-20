@@ -30,6 +30,29 @@ from tradingagents.agents.utils.signal_data_tools import (
 )
 
 
+def get_prompt_override(role: str, default: str) -> str:
+    """读取作业快照中的角色提示词；未配置时返回源码默认提示词。"""
+    from tradingagents.dataflows.config import get_config
+
+    configured = get_config().get("prompt_overrides") or {}
+    if isinstance(configured, list):
+        overrides = {
+            item.get("roleKey") or item.get("role") or item.get("templateKey"): item.get("content")
+            for item in configured
+            if isinstance(item, dict)
+        }
+    else:
+        overrides = configured if isinstance(configured, dict) else {}
+    value = overrides.get(role)
+    if not isinstance(value, str) or not value.strip():
+        return default
+    context = get_config().get("prompt_context") or {}
+    rendered = value
+    for name, replacement in context.items():
+        rendered = rendered.replace("{{" + str(name) + "}}", str(replacement))
+    return rendered
+
+
 def get_language_instruction() -> str:
     """Return a prompt instruction for the configured output language.
 

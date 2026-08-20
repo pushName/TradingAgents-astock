@@ -4,6 +4,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_global_news,
     get_language_instruction,
     get_news,
+    get_prompt_override,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -37,6 +38,7 @@ def create_news_analyst(llm):
             "\n5. 风险事件清单（如有）"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("news", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [

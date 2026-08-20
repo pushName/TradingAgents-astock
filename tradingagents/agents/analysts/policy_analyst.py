@@ -4,6 +4,7 @@ from tradingagents.agents.utils.agent_utils import (
     get_global_news,
     get_language_instruction,
     get_news,
+    get_prompt_override,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -46,6 +47,7 @@ def create_policy_analyst(llm):
             "\n5. 政策面总体评级"
             + get_language_instruction()
         )
+        system_message = get_prompt_override("policy", system_message)
 
         prompt = ChatPromptTemplate.from_messages(
             [
