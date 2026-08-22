@@ -232,6 +232,14 @@ class OpenAIClient(BaseLLMClient):
             if key in self.kwargs:
                 llm_kwargs[key] = self.kwargs[key]
 
+        # Some relays fingerprint the HTTP client: agentrouter.org returns
+        # 401 "unauthorized client detected" for any User-Agent that is not
+        # claude-cli. LLM_USER_AGENT overrides the SDK default so such
+        # gateways accept requests from this Python stack.
+        ua = os.environ.get("LLM_USER_AGENT")
+        if ua:
+            llm_kwargs["default_headers"] = {"User-Agent": ua}
+
         # Native OpenAI: use Responses API for consistent behavior across
         # all model families. Third-party providers use Chat Completions.
         if self.provider == "openai":

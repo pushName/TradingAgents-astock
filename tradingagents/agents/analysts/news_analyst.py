@@ -38,7 +38,8 @@ def create_news_analyst(llm):
             "\n5. 风险事件清单（如有）"
             + get_language_instruction()
         )
-        system_message = get_prompt_override("news", system_message)
+        system_message = get_prompt_override("news", system_message, state=state,
+                                             tool_names=[tool.name for tool in tools])
 
         prompt = ChatPromptTemplate.from_messages(
             [

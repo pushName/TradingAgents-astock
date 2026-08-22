@@ -62,6 +62,10 @@ def invoke_structured_or_freetext(
     if structured_llm is not None:
         try:
             result = structured_llm.invoke(prompt)
+            if result is None:
+                # 某些兼容接口在未返回工具调用时会给出 None，不能把它交给
+                # render 函数，否则只会产生误导性的 NoneType 异常。
+                raise ValueError("模型未返回结构化结果")
             return render(result)
         except Exception as exc:
             logger.warning(

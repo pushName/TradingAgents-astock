@@ -70,7 +70,8 @@ def create_hot_money_tracker(llm):
             "\n6. 资金面总体判断"
             + get_language_instruction()
         )
-        system_message = get_prompt_override("hot_money", system_message)
+        system_message = get_prompt_override("hot_money", system_message, state=state,
+                                             tool_names=[tool.name for tool in tools])
 
         prompt = ChatPromptTemplate.from_messages(
             [

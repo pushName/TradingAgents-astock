@@ -53,3 +53,10 @@ class ModelValidationTests(unittest.TestCase):
                     client.get_llm()
 
                 self.assertEqual(caught, [])
+
+    def test_deepseek_vision_reasoner_is_catalogued_without_warning(self):
+        client = DummyLLMClient("deepseek", "deepseek-vision-reasoner")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            client.get_llm()
+        self.assertEqual(caught, [])

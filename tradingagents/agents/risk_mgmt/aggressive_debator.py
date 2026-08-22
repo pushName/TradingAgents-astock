@@ -47,7 +47,7 @@ Conversation history: {history} Last conservative argument: {current_conservativ
 
 Engage actively, debate persuasively, and assert why aggressive positioning is optimal for this A-share opportunity. Output conversationally without special formatting."""
 
-        prompt = get_prompt_override("risk_aggressive", prompt)
+        prompt = get_prompt_override("risk_aggressive", prompt, state=state)
         response = llm.invoke(prompt)
 
         argument = f"Aggressive Analyst: {response.content}"

@@ -41,7 +41,7 @@ Commit to a clear stance whenever the debate's strongest arguments warrant one; 
 **Debate History:**
 {history}""" + get_language_instruction()
 
-        prompt = get_prompt_override("research_manager", prompt)
+        prompt = get_prompt_override("research_manager", prompt, state=state)
         investment_plan = invoke_structured_or_freetext(
             structured_llm,
             llm,

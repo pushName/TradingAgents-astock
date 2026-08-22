@@ -98,7 +98,7 @@ def test_all_servers_dead_raises_then_fails_fast(fake_tdx):
     probes_after_first = len(fake_tdx["probe_calls"])
     assert probes_after_first >= len(fake_tdx["tcp_open"])
 
-    with pytest.raises(RuntimeError, match="不再重探|不再重试"):
+    with pytest.raises(RuntimeError, match="负缓存"):
         a_stock._get_mootdx_client()
     # 快速失败：没有再打一遍服务器表
     assert len(fake_tdx["probe_calls"]) == probes_after_first

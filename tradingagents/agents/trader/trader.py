@@ -44,29 +44,32 @@ def create_trader(llm):
             astock_context_parts.append(f"Lockup Expiry / Insider Reduction Report:\n{lockup_report}")
         astock_context = "\n\n".join(astock_context_parts)
 
+        system_prompt = (
+            "You are a trading agent specialising in A-share (China mainland) stocks. "
+            "Translate the Research Manager's investment plan into a structured "
+            "transaction view. You must factor in A-stock trading constraints:\n"
+            "- T+1 settlement: shares bought today cannot be sold until the next trading day\n"
+            "- Daily price limits: main board ±10%, STAR/ChiNext ±20%, Beijing Stock "
+            "Exchange ±30%. ST/*ST does NOT narrow the band — main-board ST/*ST moved "
+            "from ±5% to ±10% on 2026-07-06, and STAR/ChiNext ST/*ST have always been ±20%\n"
+            "- Newly listed stocks have no price limit for their first 5 trading days "
+            "(Beijing Stock Exchange: first day only)\n"
+            "- Minimum lot: 100 shares on main board and ChiNext (100-share multiples); "
+            "STAR board 200 shares minimum (1-share increments); Beijing Stock Exchange "
+            "100 shares minimum (1-share increments)\n"
+            "- Trading hours (Beijing time): call auction 09:15-09:25, continuous "
+            "09:30-11:30 / 13:00-14:57, closing auction 14:57-15:00, after-hours "
+            "fixed-price session 15:05-15:30 (all A-shares since 2026-07-06)\n"
+            "Anchor your reasoning in the analysts' reports and the research plan. "
+            f"{_NO_LEVELS_INSTRUCTION} "
+            "（以上参数仅供技术研究参考，不构成投资建议）"
+        )
+        system_prompt = get_prompt_override("trader", system_prompt, state=state)
+
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are a trading agent specialising in A-share (China mainland) stocks. "
-                    "Translate the Research Manager's investment plan into a structured "
-                    "transaction view. You must factor in A-stock trading constraints:\n"
-                    "- T+1 settlement: shares bought today cannot be sold until the next trading day\n"
-                    "- Daily price limits: main board ±10%, STAR/ChiNext ±20%, Beijing Stock "
-                    "Exchange ±30%. ST/*ST does NOT narrow the band — main-board ST/*ST moved "
-                    "from ±5% to ±10% on 2026-07-06, and STAR/ChiNext ST/*ST have always been ±20%\n"
-                    "- Newly listed stocks have no price limit for their first 5 trading days "
-                    "(Beijing Stock Exchange: first day only)\n"
-                    "- Minimum lot: 100 shares on main board and ChiNext (100-share multiples); "
-                    "STAR board 200 shares minimum (1-share increments); Beijing Stock Exchange "
-                    "100 shares minimum (1-share increments)\n"
-                    "- Trading hours (Beijing time): call auction 09:15-09:25, continuous "
-                    "09:30-11:30 / 13:00-14:57, closing auction 14:57-15:00, after-hours "
-                    "fixed-price session 15:05-15:30 (all A-shares since 2026-07-06)\n"
-                    "Anchor your reasoning in the analysts' reports and the research plan. "
-                    f"{_NO_LEVELS_INSTRUCTION} "
-                    "（以上参数仅供技术研究参考，不构成投资建议）"
-                ),
+                "content": system_prompt,
             },
             {
                 "role": "user",
@@ -83,7 +86,6 @@ def create_trader(llm):
             },
         ]
 
-        prompt = get_prompt_override("trader", prompt)
         trader_plan = invoke_structured_or_freetext(
             structured_llm,
             llm,

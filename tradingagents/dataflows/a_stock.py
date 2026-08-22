@@ -397,11 +397,11 @@ def _get_mootdx_client():
 
     now = time.time()
     if now < _mootdx_unavailable_until:
+        # 负缓存期间每个数据工具调用都会走到这——完整诊断只在首次探测失败时
+        # 打过一次（见下方 logger.warning），这里保持简短避免刷屏。
         raise RuntimeError(
-            "mootdx 通达信服务器暂不可用（%.0f 秒内不再重试）。"
-            "已尝试全部内置服务器：端口能连上的也没能完成通达信协议取数。"
-            "请检查网络环境（代理/防火墙/公司网络常拦 TCP 7709），"
-            "或改用 6 位股票代码直接查询。" % (_mootdx_unavailable_until - now)
+            "mootdx 通达信服务器暂不可用（负缓存中，%.0f 秒后自动重探）"
+            % (_mootdx_unavailable_until - now)
         )
 
     from mootdx.quotes import Quotes
@@ -459,6 +459,12 @@ def _get_mootdx_client():
         )
     else:
         cause = "内置服务器表里没有一台的 TCP 7709 能连上，请检查网络连通性。"
+    # 完整诊断每个负缓存周期只打这一次；后续负缓存命中的降级走 debug 静默。
+    logger.warning(
+        "mootdx 通达信服务器不可用：%s"
+        "可改用 6 位股票代码直接查询。%.0f 秒内将直接快速失败、不再逐台重探。",
+        cause, _MOOTDX_RETRY_AFTER_S,
+    )
     raise RuntimeError(
         "mootdx 通达信服务器不可用：%s"
         "可改用 6 位股票代码直接查询。%.0f 秒内将直接快速失败、不再逐台重探。"
@@ -793,7 +799,9 @@ def _load_ohlcv_astock(symbol: str, curr_date: str) -> pd.DataFrame:
         df = df[["Date", "Open", "High", "Low", "Close", "Volume"]]
         df = _normalize_ohlcv_dates(df)
     except Exception as e:
-        logger.warning("mootdx OHLCV failed for %s: %s, trying sina HTTP fallback", code, e)
+        # 降级到新浪是设计内路径且最终报告会标注数据源，降 debug 避免负缓存
+        # 期间每个工具调用都刷 warning；新浪也失败时下方 raise 才是真正的错误。
+        logger.debug("mootdx OHLCV failed for %s: %s, trying sina HTTP fallback", code, e)
         # Fallback: Sina direct HTTP API
         try:
             df = _sina_kline_fallback(code)
@@ -855,7 +863,9 @@ def get_stock_data(
         df = _normalize_ohlcv_dates(df)
 
     except Exception as e:
-        logger.warning("mootdx K-line failed for %s: %s, trying sina HTTP fallback", code, e)
+        # 同上：降级到新浪是设计内路径，降 debug 防负缓存期间刷屏；
+        # 新浪也失败时返回的错误消息才是真正要暴露的。
+        logger.debug("mootdx K-line failed for %s: %s, trying sina HTTP fallback", code, e)
         # Fallback: Sina direct HTTP API
         try:
             df = _sina_kline_fallback(code, start_date, end_date)
@@ -1478,16 +1488,18 @@ def get_global_news(
 
     all_news: list[dict] = []
 
-    # Source 1: CLS wire (财联社快讯) — direct HTTP
+    # Source 1: 新浪财经滚动快讯 — direct HTTP
+    # （原 CLS telegraphList 接口已下线（404），新接口需要签名验证，
+    #   改用免签的新浪 roll 源，内容同为财经快讯。）
     try:
-        cls_url = "https://www.cls.cn/nodeapi/telegraphList"
-        cls_params = {"rn": str(limit), "page": "1"}
-        cls_headers = {"User-Agent": _UA, "Referer": "https://www.cls.cn/"}
-        r_cls = _requests.get(cls_url, params=cls_params, headers=cls_headers, timeout=10)
-        d_cls = r_cls.json()
-        for item in d_cls.get("data", {}).get("roll_data", []):
-            title = item.get("title", "") or item.get("brief", "")
-            content = item.get("content", "") or item.get("brief", "")
+        sina_url = "https://feed.mix.sina.com.cn/api/roll/get"
+        sina_params = {"pageid": 153, "lid": 2516, "num": str(limit), "page": 1}
+        sina_headers = {"User-Agent": _UA, "Referer": "https://finance.sina.com.cn/"}
+        r_sina = _requests.get(sina_url, params=sina_params, headers=sina_headers, timeout=10)
+        d_sina = r_sina.json()
+        for item in (d_sina.get("result") or {}).get("data", []) or []:
+            title = item.get("title", "") or ""
+            content = item.get("intro", "") or item.get("summary", "") or ""
             ctime = item.get("ctime", "")
             # ctime is unix timestamp
             pub_time = ""
@@ -1500,10 +1512,10 @@ def get_global_news(
                 "title": title,
                 "content": content,
                 "time": pub_time,
-                "source": "CLS Wire",
+                "source": "Sina Finance",
             })
     except Exception as e:
-        logger.warning("CLS news fetch failed: %s", e)
+        logger.warning("Sina news fetch failed: %s", e)
 
     # Source 2: Eastmoney global (东财7x24资讯) — direct HTTP
     try:

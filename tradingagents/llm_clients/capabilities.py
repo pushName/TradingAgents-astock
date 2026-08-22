@@ -49,6 +49,16 @@ _DEEPSEEK_CHAT = ModelCapabilities(
     preferred_structured_method="function_calling",
 )
 
+# 该视觉推理模型当前只稳定返回文本，不保证返回结构化工具调用结果。
+# 直接走自由文本路径，避免结构化解析得到 None 后重复请求一次。
+_DEEPSEEK_VISION = ModelCapabilities(
+    supports_tool_choice=False,
+    supports_json_mode=False,
+    supports_json_schema=False,
+    preferred_structured_method="none",
+    requires_reasoning_content_roundtrip=True,
+)
+
 _MINIMAX_THINKING = ModelCapabilities(
     supports_tool_choice=True,
     supports_json_mode=False,
@@ -70,6 +80,8 @@ _BY_ID: dict[str, ModelCapabilities] = {
     "deepseek-reasoner": _DEEPSEEK_THINKING,
     "deepseek-v4-flash": _DEEPSEEK_THINKING,
     "deepseek-v4-pro": _DEEPSEEK_THINKING,
+    # 视觉推理模型按 DeepSeek 思考模型处理，保留 reasoning_content 往返。
+    "deepseek-vision-reasoner": _DEEPSEEK_VISION,
     "MiniMax-M2": _MINIMAX_THINKING,
     "MiniMax-M2.1": _MINIMAX_THINKING,
     "MiniMax-M2.1-highspeed": _MINIMAX_THINKING,

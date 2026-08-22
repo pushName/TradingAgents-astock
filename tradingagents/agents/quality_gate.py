@@ -152,7 +152,7 @@ def create_quality_gate(llm):
         if fail_count < 4:
             try:
                 review_prompt = _build_review_prompt(reports, trade_date, ticker)
-                review_prompt = get_prompt_override("quality_gate", review_prompt)
+                review_prompt = get_prompt_override("quality_gate", review_prompt, state=state)
                 response = llm.invoke(review_prompt)
                 llm_review = response.content
             except Exception as e:

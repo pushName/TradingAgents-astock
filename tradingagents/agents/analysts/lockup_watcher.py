@@ -54,7 +54,8 @@ def create_lockup_watcher(llm):
             "\n5. 未来 3 个月潜在减持风险评估"
             + get_language_instruction()
         )
-        system_message = get_prompt_override("lockup", system_message)
+        system_message = get_prompt_override("lockup", system_message, state=state,
+                                             tool_names=[tool.name for tool in tools])
 
         prompt = ChatPromptTemplate.from_messages(
             [

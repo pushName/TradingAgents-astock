@@ -67,11 +67,13 @@ MODEL_OPTIONS: ProviderModeOptions = {
         "quick": [
             ("DeepSeek V4 Flash - Latest V4 fast model", "deepseek-v4-flash"),
             ("DeepSeek V3.2", "deepseek-chat"),
+            ("DeepSeek Vision Reasoner - 视觉推理模型", "deepseek-vision-reasoner"),
             ("Custom model ID", "custom"),
         ],
         "deep": [
             ("DeepSeek V4 Pro - Latest V4 flagship model", "deepseek-v4-pro"),
             ("DeepSeek V3.2 (thinking)", "deepseek-reasoner"),
+            ("DeepSeek Vision Reasoner - 视觉推理模型", "deepseek-vision-reasoner"),
             ("DeepSeek V3.2", "deepseek-chat"),
             ("Custom model ID", "custom"),
         ],

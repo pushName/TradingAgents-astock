@@ -50,7 +50,7 @@ Last bear argument: {current_response}
 Deliver a compelling bull argument that integrates A-share market dynamics. Refute the bear's concerns and demonstrate why the bull position holds stronger merit in the Chinese market context.
 """
 
-        prompt = get_prompt_override("bull", prompt)
+        prompt = get_prompt_override("bull", prompt, state=state)
         response = llm.invoke(prompt)
 
         argument = f"Bull Analyst: {response.content}"

@@ -2,6 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from tradingagents.agents.utils.agent_utils import (
     build_instrument_context,
     get_indicators,
+    get_prompt_override,
     get_language_instruction,
     get_stock_data,
 )
@@ -19,7 +20,6 @@ def create_market_analyst(llm):
         tools = [
     get_stock_data,
     get_indicators,
-    get_prompt_override,
         ]
 
         system_message = (
@@ -71,7 +71,8 @@ MACD 类：
 5. 关键支撑位和阻力位"""
             + get_language_instruction()
         )
-        system_message = get_prompt_override("market", system_message)
+        system_message = get_prompt_override("market", system_message, state=state,
+                                             tool_names=[tool.name for tool in tools])
 
         prompt = ChatPromptTemplate.from_messages(
             [

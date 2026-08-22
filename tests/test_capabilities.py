@@ -9,10 +9,17 @@ from tradingagents.llm_clients.openai_client import MinimaxChatOpenAI
 
 @pytest.mark.unit
 def test_deepseek_v4_and_reasoner_reject_tool_choice():
-    for model in ("deepseek-v4-flash", "deepseek-v4-pro", "deepseek-reasoner"):
+    for model in ("deepseek-v4-flash", "deepseek-v4-pro", "deepseek-reasoner", "deepseek-vision-reasoner"):
         capabilities = get_capabilities(model)
         assert capabilities.supports_tool_choice is False
         assert capabilities.requires_reasoning_content_roundtrip is True
+
+
+@pytest.mark.unit
+def test_deepseek_vision_reasoner_uses_single_free_text_path():
+    capabilities = get_capabilities("deepseek-vision-reasoner")
+    assert capabilities.preferred_structured_method == "none"
+    assert capabilities.supports_tool_choice is False
 
 
 @pytest.mark.unit
@@ -147,3 +154,21 @@ def test_optional_tool_call_returning_none_still_falls_back_to_free_text():
 
     assert out == "free text fallback"
     plain.invoke.assert_called_once()
+
+
+@pytest.mark.unit
+def test_none_structured_result_falls_back_without_rendering_none():
+    from unittest.mock import MagicMock
+    from tradingagents.agents.utils.structured import invoke_structured_or_freetext
+
+    structured = MagicMock()
+    structured.invoke.return_value = None
+    plain = MagicMock()
+    plain.invoke.return_value = MagicMock(content="自由文本结果")
+
+    result = invoke_structured_or_freetext(
+        structured, plain, "提示词", lambda value: value.answer, "测试角色"
+    )
+
+    assert result == "自由文本结果"
+    plain.invoke.assert_called_once_with("提示词")

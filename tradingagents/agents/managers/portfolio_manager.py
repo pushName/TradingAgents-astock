@@ -92,7 +92,7 @@ def create_portfolio_manager(llm):
 
 Be decisive and ground every conclusion in specific evidence from the analysts.{_NO_LEVELS_RULE}{get_language_instruction()}"""
 
-        prompt = get_prompt_override("portfolio_manager", prompt)
+        prompt = get_prompt_override("portfolio_manager", prompt, state=state)
         final_trade_decision = invoke_structured_or_freetext(
             structured_llm,
             llm,
